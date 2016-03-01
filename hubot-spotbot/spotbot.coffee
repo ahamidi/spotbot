@@ -2,11 +2,11 @@
 #   Spotbot integration plugin
 #
 # Dependencies:
-#   "pubnub": "3.13.x"
+#   "ioredis": "1.15.x"
 #
 # Configuration:
-#   PUBNUB_PUBLISH_KEY
-#   PUBNUB_SUBSCRIBE_KEY
+#   REDIS_URL
+#   REDIS_CHANNEL
 #
 # Commands:
 #   hubot stop
@@ -16,23 +16,17 @@
 # Author:
 #   ahamidi
 
-PUBNUB = require 'pubnub'
-pubnub = PUBNUB.init(
-  publish_key: process.env.PUBNUB_PUBLISH_KEY,
-  subscribe_key: process.env.PUBNUB_SUBSCRIBE_KEY,
-  ssl: true)
+Redis = require 'ioredis'
+redis = new Redis(process.env.REDIS_URL)
 
 module.exports = (robot) ->
   robot.respond /music (.*)/i, (res) ->
     command = res.match[1]
     publishMsg command, (m) ->
-      res.reply "#{m[1]}"
+      res.reply m
 
 publishMsg = (msg, cb) ->
   jsonMsg =
     command: "#{msg}"
-
-  pubnub.publish
-    channel: 'music'
-    message: jsonMsg
-    callback: cb
+  redis.publish('music', JSON.stringify(jsonMsg))
+  cb "sent!"
