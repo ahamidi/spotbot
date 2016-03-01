@@ -1,0 +1,2 @@
+# Spotbot - Hubot/Spotify Integration
+
